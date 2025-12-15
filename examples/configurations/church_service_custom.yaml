@@ -1,0 +1,183 @@
+# Custom Church Service Configuration
+# Based on church_service profile with custom modifications
+
+profile: church_service_custom
+
+domain:
+  type: speech
+  language: "en"
+  characteristics:
+    - formal_speech
+    - sermon
+    - music_background
+    - audience_interaction
+    - applause
+    - pauses
+
+semantic_labeling:
+  enabled: true
+
+  categories:
+    sermon:
+      description: "Main sermon or homily portion"
+      color: "#2E86AB"
+      icon: "microphone"
+      min_duration: 240  # 4 minutes minimum (reduced from 5)
+
+    worship_music:
+      description: "Musical worship and songs"
+      color: "#A23B72"
+      icon: "music"
+      min_duration: 45  # Reduced from 60 seconds
+
+    prayer:
+      description: "Prayer segments"
+      color: "#F18F01"
+      icon: "hands"
+      min_duration: 20  # Reduced from 30 seconds
+
+    scripture_reading:
+      description: "Reading of religious texts"
+      color: "#C73E1D"
+      icon: "book"
+      min_duration: 45  # Reduced from 60 seconds
+
+    announcement:
+      description: "Church announcements and updates"
+      color: "#6B4C7A"
+      icon: "megaphone"
+      min_duration: 10  # Reduced from 15 seconds
+
+    testimony:
+      description: "Personal testimonies and sharing"
+      color: "#4CAF50"
+      icon: "person"
+      min_duration: 30
+
+    applause:
+      description: "Audience applause or affirmation"
+      color: "#8BC34A"
+      icon: "clap"
+      min_duration: 2
+
+    silence:
+      description: "Moments of silence or reflection"
+      color: "#9E9E9E"
+      icon: "pause"
+      min_duration: 3  # Reduced from 5 seconds
+
+  rules:
+    - name: "detect_sermon_start"
+      label: "sermon"
+      priority: 9
+      confidence_threshold: 0.7
+      pattern:
+        min_duration: 240
+        silence_threshold: -38  # Slightly more sensitive
+        energy_range:
+          min: 0.08
+          max: 0.8
+        spectral_features:
+          centroid_range:
+            min: 1000
+            max: 3000
+
+    - name: "detect_worship_music"
+      label: "worship_music"
+      priority: 8
+      confidence_threshold: 0.6
+      pattern:
+        min_duration: 45
+        silence_threshold: -28  # Less strict for music
+        energy_range:
+          min: 0.15
+          max: 0.9
+        spectral_features:
+          centroid_range:
+            min: 400
+            max: 2500
+
+    - name: "detect_testimony"
+      label: "testimony"
+      priority: 7
+      confidence_threshold: 0.65
+      pattern:
+        min_duration: 30
+        max_duration: 300
+        silence_threshold: -36
+        energy_range:
+          min: 0.08
+          max: 0.6
+
+    - name: "detect_applause"
+      label: "applause"
+      priority: 4
+      confidence_threshold: 0.8
+      pattern:
+        min_duration: 2
+        max_duration: 15
+        energy_range:
+          min: 0.25
+          max: 1.0
+        spectral_features:
+          centroid_range:
+            min: 2000
+            max: 4000
+
+audio:
+  sample_rate: 48000  # Higher quality than default
+  bit_depth: 16
+  channels: 2  # Stereo for better music preservation
+  format: wav
+  normalize: true
+  trim_silence: false  # Keep intentional silences
+  preprocessing:
+    high_pass_filter:
+      enabled: true
+      cutoff: 60  # Lower cutoff for fuller sound
+    noise_reduction:
+      enabled: true
+      strength: 0.25  # Lighter noise reduction
+
+segmentation:
+  method: semantic
+  min_segment_length: 5.0
+  max_segment_length: 720.0  # 12 minutes maximum
+  silence_threshold: -38  # More sensitive
+  silence_padding: 0.4  # Slightly more padding
+  vad_aggressiveness: 2
+  energy_threshold: 0.05
+  spectral_threshold: 0.1
+
+output:
+  format: wav
+  sample_rate: null  # Keep original
+  bit_depth: 16
+  quality: high
+  naming_scheme: semantic
+  metadata: true
+  segments_file:
+    enabled: true
+    format: json
+    include_semantic_labels: true
+    include_confidence_scores: true
+    include_audio_features: false
+  visualization:
+    enabled: true
+    format: png
+    waveform: true
+    spectrogram: true
+    segments_overlay: true
+    semantic_colors: true
+
+performance:
+  batch_size: 16
+  num_workers: 2
+  memory_limit: 2048
+  use_gpu: false
+  chunk_size: 4096
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  verbose: false

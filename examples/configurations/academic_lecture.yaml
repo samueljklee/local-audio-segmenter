@@ -1,0 +1,212 @@
+# Academic Lecture Configuration
+# Optimized for university lectures with student interaction
+
+profile: academic_lecture
+
+domain:
+  type: speech
+  language: "en"
+  characteristics:
+    - formal_speech
+    - lecture
+    - questions
+    - pauses
+    - technical_content
+
+semantic_labeling:
+  enabled: true
+
+  categories:
+    main_lecture:
+      description: "Primary lecture content delivery"
+      color: "#2E86AB"
+      icon: "chalkboard"
+      min_duration: 180  # 3 minutes minimum
+
+    slide_presentation:
+      description: "Content synchronized with presentation slides"
+      color: "#1976D2"
+      icon: "slideshow"
+      min_duration: 30
+
+    student_question:
+      description: "Questions from students"
+      color: "#F18F01"
+      icon: "question"
+      min_duration: 5
+
+    instructor_answer:
+      description: "Answers to student questions"
+      color: "#C73E1D"
+      icon: "answer"
+      min_duration: 10
+
+    group_discussion:
+      description: "Group activities and discussions"
+      color: "#4CAF50"
+      icon: "groups"
+      min_duration: 60
+
+    demonstration:
+      description: "Live demonstrations or examples"
+      color: "#9C27B0"
+      icon: "science"
+      min_duration: 30
+
+    introduction:
+      description: "Course introduction and overview"
+      color: "#6B4C7A"
+      icon: "intro"
+      min_duration: 60
+
+    conclusion:
+      description: "Lecture summary and wrap-up"
+      color: "#607D8B"
+      icon: "summary"
+      min_duration: 60
+
+    technical_explanation:
+      description: "Detailed technical explanations"
+      color: "#795548"
+      icon: "code"
+      min_duration: 45
+
+    pause_for_notes:
+      description: "Intentional pauses for student note-taking"
+      color: "#9E9E9E"
+      icon: "pause"
+      min_duration: 3
+
+    background_noise:
+      description: "Classroom background noise and movement"
+      color: "#FF9800"
+      icon: "people"
+      min_duration: 2
+
+  rules:
+    - name: "detect_main_lecture"
+      label: "main_lecture"
+      priority: 9
+      confidence_threshold: 0.7
+      pattern:
+        min_duration: 180
+        silence_threshold: -35
+        energy_range:
+          min: 0.12
+          max: 0.7
+        spectral_features:
+          centroid_range:
+            min: 1500
+            max: 4000
+
+    - name: "detect_student_question"
+      label: "student_question"
+      priority: 8
+      confidence_threshold: 0.6
+      pattern:
+        min_duration: 5
+        max_duration: 45
+        silence_threshold: -40
+        energy_range:
+          min: 0.06
+          max: 0.4
+        spectral_features:
+          centroid_range:
+            min: 1200
+            max: 3500
+
+    - name: "detect_instructor_answer"
+      label: "instructor_answer"
+      priority: 7
+      confidence_threshold: 0.65
+      pattern:
+        min_duration: 10
+        max_duration: 180
+        silence_threshold: -36
+        energy_range:
+          min: 0.1
+          max: 0.6
+
+    - name: "detect_group_discussion"
+      label: "group_discussion"
+      priority: 6
+      confidence_threshold: 0.6
+      pattern:
+        min_duration: 60
+        silence_threshold: -32
+        energy_range:
+          min: 0.15
+          max: 0.9
+
+    - name: "detect_technical_explanation"
+      label: "technical_explanation"
+      priority: 5
+      confidence_threshold: 0.7
+      pattern:
+        min_duration: 45
+        silence_threshold: -34
+        energy_range:
+          min: 0.08
+          max: 0.5
+        spectral_features:
+          centroid_range:
+            min: 1800
+            max: 4500
+
+audio:
+  sample_rate: 44100
+  bit_depth: 16
+  channels: 1
+  format: wav
+  normalize: true
+  trim_silence: false  # Keep teaching pauses
+  preprocessing:
+    high_pass_filter:
+      enabled: true
+      cutoff: 80
+    noise_reduction:
+      enabled: true
+      strength: 0.4  # Higher for classroom environment
+
+segmentation:
+  method: semantic
+  min_segment_length: 3.0  # Allow shorter segments
+  max_segment_length: 420.0  # 7 minutes maximum
+  silence_threshold: -38
+  silence_padding: 0.3
+  vad_aggressiveness: 2
+  energy_threshold: 0.08
+  spectral_threshold: 0.12
+
+output:
+  format: wav
+  sample_rate: null
+  bit_depth: 16
+  quality: high
+  naming_scheme: semantic
+  metadata: true
+  segments_file:
+    enabled: true
+    format: json
+    include_semantic_labels: true
+    include_confidence_scores: true
+    include_audio_features: false
+  visualization:
+    enabled: true
+    format: png
+    waveform: true
+    spectrogram: true
+    segments_overlay: true
+    semantic_colors: true
+
+performance:
+  batch_size: 32
+  num_workers: 4
+  memory_limit: 1024
+  use_gpu: false
+  chunk_size: 8192
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  verbose: false

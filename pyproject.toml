@@ -38,6 +38,9 @@ dependencies = [
     "click>=8.0.0",
     "soundfile>=0.10.0",
 
+    # Progress bars
+    "tqdm>=4.65.0",
+
     # Machine Learning
     "scikit-learn>=1.1.0",
     "torch>=2.0.0",

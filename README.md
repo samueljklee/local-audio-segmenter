@@ -1,6 +1,6 @@
 # Local Audio Segmenter
 
-A config-driven Python tool for intelligent audio segmentation with music/speech/silence detection, local STT transcription, and semantic labeling.
+A Python tool for audio segmentation using transcript-driven analysis. Transcribes audio with Whisper, then segments based on transcript gaps and energy-based classification.
 
 ## Features
 
@@ -92,6 +92,14 @@ Segments JSON (produced by main CLI and helpers) looks like:
   ]
 }
 ```
+
+## Documentation
+
+- **[Architecture](docs/ARCHITECTURE.md)** - System architecture and component overview
+- **[Transcript-Driven Approach](docs/TRANSCRIPT_DRIVEN_APPROACH.md)** - How the segmentation algorithms work
+- **[Parameter Guide](docs/PARAMETER_GUIDE.md)** - Parameter tuning and typical configurations
+
+> **Note**: Previous documentation described a more complex multi-detector system with semantic labeling. Those docs have been archived to `docs/archived/` as they described features that were never implemented. The current implementation uses a simpler, more reliable transcript-driven approach.
 
 ## Development
 
